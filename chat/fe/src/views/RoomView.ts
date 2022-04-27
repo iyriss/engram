@@ -238,7 +238,7 @@ export function RoomView(props: RoomViewProps) {
     const input = Input();
 
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && input.value.trim()) {
         props.onSubmit(input.value);
         input.value = '';
       }
