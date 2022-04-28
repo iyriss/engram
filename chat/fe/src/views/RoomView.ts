@@ -6,6 +6,8 @@ import {
   MessageType,
   onRoomMessage,
   sendRoomMessage,
+  deleteRoomMessage,
+  onDeleteMessage,
 } from '../apis/RoomApi';
 
 import { getUser } from '../apis/UserApi';
@@ -15,6 +17,7 @@ import { Span } from '../components/Span';
 import { Input } from '../components/Input';
 import { Routes } from '../routes/Routes';
 import { Borders } from '../theme/Borders';
+import '../../public/assets';
 import { onClick, setStyle, setText } from '../utils/DomUtils';
 import { setURL } from '../utils/HistoryUtils';
 
@@ -40,6 +43,7 @@ export function RoomView(props: RoomViewProps) {
   const room = getRoom(props.roomId);
 
   onRoomMessage(props.roomId, (message) => {
+    console.log('ruuuning happily here');
     if (isLastMessageToday(messages[1], message)) {
       messageList.prepend(DateDivider(message.createdAt));
     }
@@ -47,7 +51,13 @@ export function RoomView(props: RoomViewProps) {
     messageList.prepend(newMessage);
   });
 
+  onDeleteMessage(props.roomId, () => {
+    console.log('on delete message');
+    messageList.removeChild(messageList.firstChild);
+  });
+
   function Message(props: MessageType) {
+    console.log('Message()');
     const el = Div({
       class: 'message',
     });
@@ -133,7 +143,20 @@ export function RoomView(props: RoomViewProps) {
         textAlign: 'center',
         // fontSize: '20px',
       });
+      // const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      const img = document.createElement('img');
+      img.src =
+        'https://github.com/iyriss/engram/blob/main/chat/fe/public/assets/trashIcon.svg';
+      // img.alt = 'alternative text';
+      // console.log('trash', TrashIcon);
       messageOptions.innerHTML = 'Delete';
+      // svg.appendChild(img);
+      messageOptions.appendChild(img);
+
+      messageOptions.addEventListener('click', () => {
+        handleDeleteMessage(props._id);
+      });
+
       bodyEl.append(messageOptions);
       messageContentEl.append(bodyEl);
     }
@@ -315,6 +338,14 @@ export function RoomView(props: RoomViewProps) {
     sendRoomMessage({
       room: props.roomId,
       body: text,
+    });
+  }
+
+  function handleDeleteMessage(messageId: string) {
+    console.log(messageId, '<<<<<', props);
+    deleteRoomMessage({
+      room: props.roomId,
+      id: messageId,
     });
   }
 

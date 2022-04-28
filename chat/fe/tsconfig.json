@@ -1,0 +1,16 @@
+{
+  // "compilerOptions": {
+  //   "rootDir": "./",
+  //   "target": "es6",
+  //   "module": "commonjs",
+  //   "esModuleInterop": true,
+  //   "allowSyntheticDefaultImports": true,
+  //   "emitDecoratorMetadata": true,
+  //   "experimentalDecorators": true,
+  //   "noEmitHelpers": true,
+  //   "importHelpers": true,
+  //   "incremental": true,
+  //   "tsBuildInfoFile": ".tsbuildinfo"
+  // },
+  "include": ["src", "types"] 
+}

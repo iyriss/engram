@@ -9,6 +9,7 @@ import { UserRoomConfig } from './UserRoomConfigApi';
 type MessageListener = (message: MessageType) => any;
 
 const messageListenerByRoomId: { [id: string]: MessageListener } = {};
+const deleteMessageListenerByRoomId: { [id: string]: () => any } = {};
 
 export type Room = {
   _id: string;
@@ -31,7 +32,7 @@ export async function initializeRoomApi() {
 
     const currentUser = getSelf();
     const messageSender = getUser(message.user);
-
+    console.log('message', message);
     if (message.user !== currentUser._id)
       sendNotification({
         title: room.name,
@@ -39,14 +40,59 @@ export async function initializeRoomApi() {
       });
 
     const roomId = message.room;
+
+    // console.log('messagesByRoomID', messagesByRoomID);
+    // console.log('message', message);
+    // console.log('messageListenerByRoomId', messageListenerByRoomId);
+
+    if (1) {
+    }
+    console.log('messageListenerByRoomId', messageListenerByRoomId);
     if (messagesByRoomID[roomId]) {
       messagesByRoomID[roomId].unshift(message);
 
       if (messageListenerByRoomId[roomId]) {
         messageListenerByRoomId[roomId](message);
+        console.log('message', message);
+
+        console.log(
+          'messageListenerByRoomId[roomId]',
+          messageListenerByRoomId[roomId]
+        );
       }
     }
   });
+
+  socket.on('delete-message', ({ room, user }) => {
+    // const roomId = room;
+    // const currentUser = getSelf();
+    // const messageSender = getUser(message.user);
+
+    // if (message.user !== currentUser._id)
+    console.log('messagesByRoomID ~~~~', user);
+    // console.log('message', message);
+    // console.log('messageListenerByRoomId', messageListenerByRoomId);
+    deleteMessageListenerByRoomId[room]();
+  });
+
+  //   socket.on('delete-message', ({ id, room }) => {
+  //     alert('aaaaler');
+  //     console.log('x', id, room);
+  //     if (messagesByRoomID[room]) {
+  //       messagesByRoomID[room].shift();
+  //       // onRoomMessage
+  //       onDeleteRoomMessage
+  //       // if (messageListenerByRoomId[roomId]) {
+  //       //   messageListenerByRoomId[roomId](message);
+  //       //   console.log('message', message);
+
+  //       //   console.log(
+  //       //     'messageListenerByRoomId[roomId]',
+  //       //     messageListenerByRoomId[roomId]
+  //       //   );
+  //       // }
+  //     }
+  //   });
 }
 
 const roomsById: { [key: string]: Room } = {};
@@ -114,9 +160,32 @@ export async function sendRoomMessage(params: SendRoomMessageParams) {
   });
 }
 
+type DeleteRoomMessageParams = {
+  id: string;
+  room: string;
+};
+
+export async function deleteRoomMessage(params: DeleteRoomMessageParams) {
+  fetch(`/api/rooms/${params.room}/messages`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: params.id,
+    }),
+  });
+}
+
 export async function onRoomMessage(
   roomId: string,
   handler: (message: MessageType) => any
 ) {
+  console.log('on room message', handler);
   messageListenerByRoomId[roomId] = handler;
+}
+
+export async function onDeleteMessage(roomId: string, handler: () => any) {
+  console.log('handler in delete', handler);
+  deleteMessageListenerByRoomId[roomId] = handler;
 }
